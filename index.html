@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ElectroQuiz - With Store</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="logo.png">
+    
+    <style>
+        /* ... existing styles ... */
+
+    
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --text-light: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #cbd5e1;
+            --shadow: rgba(0,0,0,0.05);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #0ea5e9;
+            --radius: 12px;
+            --transition: all 0.3s ease;
+            --sidebar-bg: #ffffff;
+            --sidebar-text: #1e293b;
+            --sidebar-hover: #e2e8f0;
+            --sidebar-active: var(--primary);
+            --explain-bg: #eff6ff;
+            --explain-text: #1e293b;
+            --explain-border: #0ea5e9;
+        }
+
+        [data-theme="dark"] {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-sub: #cbd5e1;
+            --text-light: #64748b;
+            --border: #334155;
+            --border-light: #475569;
+            --shadow: rgba(0,0,0,0.3);
+            --sidebar-bg: #1e293b;
+            --sidebar-text: #f1f5f9;
+            --sidebar-hover: #334155;
+            --sidebar-active: var(--primary);
+            --explain-bg: #334155;
+            --explain-text: #f1f5f9;
+            --explain-border: #38bdf8;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+        
+        body {
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- APP CONTAINER --- */
+        .app-container {
+            width: 100%;
+            max-width: 100%;
+            min-height: 100vh;
+            background: var(--bg);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER & NAV --- */
+        .header {
+            background: var(--card-bg);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .brand { 
+            font-weight: 800; 
+            font-size: 18px; 
+            color: var(--primary); 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- THEME TOGGLE --- */
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            color: var(--text-sub);
+            transition: var(--transition);
+        }
+        .theme-toggle:hover { background: var(--border); }
+
+        .mode-switch {
+            background: var(--border);
+            padding: 3px;
+            border-radius: 20px;
+            display: flex;
+            gap: 3px;
+        }
+        .mode-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-sub);
+            transition: var(--transition);
+        }
+        .mode-btn.active { 
+            background: var(--primary); 
+            color: white;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-sub);
+            padding: 8px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        /* --- SCREENS --- */
+        .screen { 
+            display: none; 
+            flex: 1;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+        .screen.active { 
+            display: flex;
+            flex-direction: column;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(5px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .screen-content { padding: 16px; flex: 1; }
+
+        /* --- CATEGORY GRID & SEARCH --- */
+        .search-bar {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 16px;
+            margin-bottom: 16px;
+            background: var(--card-bg);
+            color: var(--text-main);
+        }
+        .search-bar:focus { outline: none; border-color: var(--primary); }
+        
+        .welcome-text { margin-bottom: 20px; }
+        .welcome-text h2 { margin: 0; font-size: 22px; }
+        .welcome-text p { color: var(--text-sub); margin: 5px 0 0 0; }
+
+        .random-controls {
+            margin: 16px 0;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .toggle-btn {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-sub);
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .toggle-btn.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .cat-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 12px; 
+        }
+        .cat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+        }
+        .cat-card:hover { 
+            border-color: var(--primary); 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 12px var(--shadow); 
+        }
+        .cat-thumbnail {
+            width: 100%;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .cat-icon { font-size: 24px; margin-bottom: 8px; display: block; }
+        .cat-title { font-weight: 700; display: block; margin-bottom: 4px; font-size: 14px; }
+        .cat-count { font-size: 11px; color: var(--text-sub); }
+
+        /* --- STORE STYLES (NEW) --- */
+        .store-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+        .store-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow);
+            border-color: var(--primary);
+        }
+        .store-badge {
+            background: var(--success);
+            color: white;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            align-self: flex-start;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .store-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+        .store-desc {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        .btn-install {
+            background: var(--bg);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 8px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: var(--transition);
+        }
+        .btn-install:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-install.installed {
+            background: var(--border);
+            color: var(--text-sub);
+            border-color: var(--border);
+            cursor: default;
+        }
+
+        /* --- QUIZ INTERFACE --- */
+        .progress-bar { 
+            height: 6px; 
+            background: var(--border); 
+            border-radius: 3px; 
+            margin-bottom: 12px; 
+            overflow: hidden; 
+        }
+        .progress-fill { 
+            height: 100%; 
+            background: var(--primary); 
+            width: 0%; 
+            transition: width 0.3s; 
+        }
+        
+        .q-badge { 
+            display: inline-block; 
+            background: var(--primary); 
+            color: white; 
+            font-size: 10px; 
+            padding: 3px 8px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            margin-bottom: 8px; 
+        }
+
+        .q-img { 
+            max-width: 100%; 
+            max-height: 200px; 
+            object-fit: contain; 
+            border-radius: 8px; 
+            margin: 8px auto 16px auto; 
+            display: block; 
+            border: 1px solid var(--border); 
+        }
+        .question-text { 
+            font-size: 16px; 
+            font-weight: 600; 
+            line-height: 1.4; 
+            margin-bottom: 12px; 
+            text-align: center; 
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; 
+        }
+
+        .option {
+            background: var(--card-bg); 
+            border: 2px solid var(--border); 
+            border-radius: 10px; 
+            padding: 10px 12px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            transition: var(--transition); 
+            font-weight: 500;
+            font-size: 14px;
+            min-height: 48px; 
+        }
+        .option:hover { 
+            border-color: var(--primary); 
+            background: var(--bg); 
+        }
+        .option.correct { 
+            border-color: var(--success); 
+            background: rgba(16, 185, 129, 0.1); 
+            color: var(--success); 
+        }
+        .option.wrong { 
+            border-color: var(--danger); 
+            background: rgba(239, 68, 68, 0.1); 
+            color: var(--danger); 
+        }
+        
+        .opt-img-thumb { 
+            width: 44px; 
+            height: 44px; 
+            object-fit: cover; 
+            border-radius: 6px; 
+            margin-right: 12px; 
+            background: var(--border); 
+            transition: transform 0.2s;
+            box-shadow: 0 1px 3px var(--shadow);
+        }
+        .option:hover .opt-img-thumb { transform: scale(1.05); }
+
+        .action-area { 
+            margin-top: 15px; 
+            display: flex; 
+            justify-content: flex-end; 
+        }
+        .btn-primary { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 15px;
+            transition: var(--transition);
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        /* --- RESULT SCREEN --- */
+        .result-box { 
+            text-align: center; 
+            padding: 30px 20px; 
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .score-circle { 
+            width: 100px; 
+            height: 100px; 
+            border-radius: 50%; 
+            background: var(--primary); 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            margin: 0 auto 20px;
+        }
+        .score-big { font-size: 28px; font-weight: 800; }
+        .score-label { font-size: 11px; opacity: 0.9; }
+
+        /* --- ADMIN STYLES --- */
+        .admin-layout {
+            display: flex;
+            height: calc(100vh - 58px);
+            overflow: hidden;
+            background: var(--bg);
+        }
+        .admin-sidebar {
+            width: 240px;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            overflow-y: auto;
+            padding: 0;
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 90;
+            box-shadow: 4px 0 12px var(--shadow);
+        }
+        .admin-main { flex: 1; overflow-y: auto; background: var(--bg); padding: 20px; }
+        
+        .sidebar-menu { margin: 0; padding: 0; list-style: none; }
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+        }
+        .sidebar-menu a:hover {
+            background: var(--sidebar-hover);
+            border-left-color: var(--primary);
+        }
+        .sidebar-menu a.active {
+            background: var(--sidebar-active);
+            color: white;
+            border-left-color: var(--primary);
+        }
+        .sidebar-menu .icon { margin-right: 12px; font-size: 18px; width: 20px; text-align: center; }
+        .sidebar-divider { height: 1px; background: var(--sidebar-hover); margin: 10px 20px; }
+        .sidebar-title { padding: 0 20px 8px; font-size: 11px; text-transform: uppercase; color: var(--text-light); font-weight: 600; margin: 0; }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 58px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 85;
+        }
+        .sidebar-overlay.active { display: block; }
+
+        /* --- FORM ELEMENTS --- */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-sub); }
+        input, select, textarea { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            font-size: 14px; 
+            background: var(--card-bg);
+            color: var(--text-main);
+            transition: var(--transition);
+        }
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; }
+
+        .admin-controls { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .filter-chip { 
+            padding: 6px 12px; 
+            background: var(--border); 
+            border-radius: 20px; 
+            font-size: 12px; 
+            cursor: pointer; 
+            white-space: nowrap;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+        .filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .q-list-item { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            transition: var(--transition);
+        }
+        .btn-sm { 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            border: none; 
+            font-size: 12px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            margin-left: 5px;
+            transition: var(--transition);
+        }
+        .btn-edit { background: var(--warning); color: white; }
+        .btn-del { background: var(--danger); color: white; }
+
+        .admin-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .admin-section h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; }
+        .btn-secondary { background: var(--text-sub); color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-right: 5px; transition: var(--transition); }
+        .btn-success { background: var(--success); color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: var(--transition); }
+        .btn-danger { background: var(--danger); color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: var(--transition); }
+
+        .import-export-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+        .search-box { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; font-size: 14px; background: var(--card-bg); color: var(--text-main); }
+        
+        .ai-prompt-box { background: var(--info); border: 1px solid var(--info); border-radius: var(--radius); padding: 15px; margin-bottom: 15px; }
+        .ai-instruction { background: rgba(14, 165, 233, 0.1); padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 10px; color: var(--info); border: 1px solid rgba(14, 165, 233, 0.2); }
+        .ai-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; text-align: center; transition: var(--transition); }
+        .stat-number { font-size: 28px; font-weight: 800; color: var(--primary); }
+        .stat-label { font-size: 13px; color: var(--text-sub); margin-top: 5px; }
+
+        /* --- MOBILE RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .header { padding: 10px 12px; }
+            .brand { font-size: 16px; }
+            .mode-switch { position: fixed; bottom: 20px; right: 20px; z-index: 200; background: var(--card-bg); box-shadow: 0 4px 12px var(--shadow); border: 1px solid var(--border); }
+            .menu-toggle { display: block; }
+            .admin-layout { position: relative; }
+            .admin-sidebar { position: fixed; left: 0; top: 58px; height: calc(100vh - 58px); transform: translateX(-100%); z-index: 90; box-shadow: 4px 0 12px var(--shadow); }
+            .admin-sidebar.active { transform: translateX(0); }
+            .screen-content, .admin-main { padding: 12px; }
+            .cat-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+            .cat-card { padding: 12px; }
+            .cat-thumbnail { height: 60px; }
+            .question-text { font-size: 16px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .action-buttons { flex-direction: column; }
+            .btn-primary, .btn-secondary, .btn-success, .btn-danger { width: 100%; }
+            .import-export-controls { flex-direction: column; }
+            .ai-controls { grid-template-columns: 1fr; }
+            .random-controls { flex-direction: row; }
+            .toggle-btn { width: auto; flex: 1; }
+            
+            .admin-header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+            .back-btn-admin { background: transparent; border: 1px solid var(--text-sub); color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+            .q-list-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .q-list-item > div:last-child { width: 100%; display: flex; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 10px; }
+            .import-export-controls button { width: 100%; margin: 0; }
+        }
+
+        @media (min-width: 769px) {
+            .app-container { max-width: 1200px; margin: 0 auto; }
+            .screen-home, .screen-quiz, .screen-result, .screen-store { max-width: 600px; margin: 0 auto; width: 100%; }
+            .menu-toggle { display: none !important; }
+            .admin-sidebar { transform: none !important; }
+        }
+
+        /* --- MODAL --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 1000; backdrop-filter: blur(3px); }
+        .modal-content { background: var(--card-bg); width: 90%; max-width: 600px; margin: 5vh auto; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto; animation: slideDown 0.3s ease; }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .close-modal-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; background: none; border: none; cursor: pointer; color: var(--text-sub); }
+        .fab-add { position: fixed; bottom: 30px; right: 30px; width: 55px; height: 55px; background: var(--primary); color: white; border-radius: 50%; border: none; font-size: 30px; box-shadow: 0 4px 12px var(--shadow); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 900; }
+        
+        .explanation-box { 
+            margin-top: 15px; 
+            padding: 15px; 
+            background: var(--explain-bg); 
+            border-left: 5px solid var(--explain-border); 
+            border-radius: 8px; 
+            font-size: 14px; 
+            color: var(--explain-text); 
+            display: none; 
+            animation: fadeIn 0.5s ease; 
+        }
+        .explanation-title { font-weight: bold; color: var(--explain-border); margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        
+        .option.disabled { pointer-events: none; opacity: 0.9; }
+        .user-selected { border: 2px solid var(--primary); }
+        
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: var(--card-bg); border-top: 1px solid var(--border); justify-content: space-around; align-items: center; z-index: 999; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: var(--text-sub); font-size: 10px; cursor: pointer; width: 100%; height: 100%; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-icon { font-size: 20px; margin-bottom: 3px; display: block; }
+        
+        @media (max-width: 768px) {
+            .bottom-nav { display: flex; }
+            .app-container { padding-bottom: 70px; }
+            .menu-toggle { display: none !important; }
+            .mode-switch { display: none; }
+        }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .shake { animation: shake 0.3s ease-in-out; border-color: #ef4444 !important; background: rgba(239, 68, 68, 0.1); }
+        
+        .confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; animation: fall linear forwards; z-index: 9999; pointer-events: none; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    </style>
+</head>
+<body data-theme="light">
+<div class="app-container">
+    
+    <div class="header">
+        <div class="brand">⚡ ElectroQuiz</div>
+        <div class="header-controls">
+            <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme"><span id="theme-icon">🌙</span></button>
+            <div class="mode-switch">
+                <button class="mode-btn active" onclick="setMode('user')">User</button>
+                <button class="mode-btn" onclick="setMode('admin')">Admin</button>
+            </div>
+            <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()" style="display:none;"><span id="menu-icon">☰</span></button>
+        </div>
+    </div>
+
+    <div id="screen-home" class="screen active">
+        <div class="screen-content">
+            <input type="text" class="search-bar" id="category-search" placeholder="🔍 Search categories..." oninput="goToHome()">
+            
+            <div class="random-controls">
+                <button class="toggle-btn" id="rand-q-btn" onclick="toggleRandomizeQuestions()">🎲 Random Qs: OFF</button>
+                <button class="toggle-btn" id="rand-o-btn" onclick="toggleRandomizeOptions()">🔀 Random Opts: OFF</button>
+            </div>
+            
+            <div class="welcome-text">
+                <h2>Let's Practice!</h2>
+                <p>Select a category to start your mock test.</p>
+            </div>
+            <div id="category-list" class="cat-grid"></div>
+        </div>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+        <div class="screen-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <button onclick="if(confirm('Exit quiz?')) goToHome()" style="background:none; border:1px solid var(--border); padding:5px 10px; border-radius:15px; cursor:pointer; font-size:13px;">🏠 Home</button>
+                <span id="q-number" style="font-weight:bold; color:var(--primary); font-size:15px;">Q. 1 / 10</span>
+            </div>
+
+            <div class="progress-bar"><div id="p-fill" class="progress-fill"></div></div>
+            
+            <div id="quiz-content"></div>
+            
+            <div class="action-area" style="display:flex; justify-content:space-between; width:100%; margin-top:15px;">
+                <button id="prev-btn" class="btn-secondary" onclick="prevQuestion()" style="display:none; border-radius:25px; padding:10px 20px;">⬅ Previous</button>
+                <button id="next-btn" class="btn-primary" onclick="nextQuestion()" style="display:none; border-radius:25px; padding:10px 20px;">Next ➡</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <div class="screen-content">
+            <div class="result-box">
+                <div class="score-circle">
+                    <span class="score-big" id="final-score">0%</span>
+                    <span class="score-label">Score</span>
+                </div>
+                <h3>Quiz Completed!</h3>
+                <p id="result-detail" style="color:var(--text-sub)">You answered X out of Y correctly.</p>
+                <br>
+                <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                    <button class="btn-secondary" onclick="reviewQuiz()">📝 Review Answers</button>
+                    <button class="btn-primary" onclick="goToHome()">🏠 Home</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-store" class="screen">
+        <div class="screen-content">
+            <div class="search-bar-wrapper" style="margin-bottom: 20px;">
+                <input type="text" class="search-bar" id="store-search" placeholder="🔍 Search Question Packs..." oninput="renderStore()">
+            </div>
+            
+            <div class="welcome-text">
+                <h2>🛍️ Question Store</h2>
+                <p>Download free packs to boost your prep.</p>
+            </div>
+
+            <div id="store-list" class="cat-grid"></div>
+        </div>
+    </div>
+
+    <div id="screen-admin" class="screen">
+        <div class="admin-layout">
+            <div class="admin-sidebar" id="admin-sidebar">
+                <div class="sidebar-menu">
+                    <a href="#" class="active" onclick="showAdminSection('dashboard')"><span class="icon">📊</span><span>Dashboard</span></a>
+                    <div class="sidebar-divider"></div>
+                    <div class="sidebar-title">Content</div>
+                    <a href="#" onclick="showAdminSection('questions')"><span class="icon">📝</span><span>Questions</span></a>
+                    <a href="#" onclick="showAdminSection('categories')"><span class="icon">📁</span><span>Categories</span></a>
+                    <div class="sidebar-divider"></div>
+                    <div class="sidebar-title">Tools</div>
+                    <a href="#" onclick="showAdminSection('ai-generator')"><span class="icon">🤖</span><span>AI Generator</span></a>
+                    <a href="#" onclick="showAdminSection('import-export')"><span class="icon">📊</span><span>Import/Export</span></a>
+                    <div class="sidebar-divider"></div>
+                    <div class="sidebar-title">Settings</div>
+                    <a href="#" onclick="showAdminSection('settings')"><span class="icon">⚙️</span><span>General Settings</span></a>
+                </div>
+            </div>
+            
+            <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+            
+            <div class="admin-main">
+                <div id="admin-dashboard" class="admin-section">
+                    <h3>Dashboard Overview</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-questions">0</div>
+                            <div class="stat-label">Total Questions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-categories">0</div>
+                            <div class="stat-label">Categories</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-quizzes">0</div>
+                            <div class="stat-label">Quizzes Taken</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="admin-questions" class="admin-section" style="display:none;">
+                    <h3>Question Bank</h3>
+                    <input type="text" class="search-box" id="search-questions" placeholder="🔍 Search questions..." oninput="renderAdminQuestions()">
+                    <label>Filter List by Category:</label>
+                    <div class="admin-controls" id="admin-filters"></div>
+                    <div id="admin-list" style="padding-bottom: 70px;"></div>
+                    <button class="fab-add" onclick="openQuestionModal()" title="Add New Question">＋</button>
+
+                    <div id="question-modal" class="modal-overlay">
+                        <div class="modal-content">
+                            <button class="close-modal-btn" onclick="closeQuestionModal()">×</button>
+                            <h3 id="modal-title" style="margin-top:0">Add Question</h3>
+                            <div id="question-form-wrapper">
+                                <input type="hidden" id="edit-id" value="">
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <div style="display:flex; gap:10px; flex-direction: column;">
+                                        <select id="cat-select" onchange="syncCatInput()" style="width:100%"><option value="">-- New Category --</option></select>
+                                        <input type="text" id="cat-input" placeholder="Type Category Name" style="width:100%">
+                                    </div>
+                                </div>
+                                <div class="form-group"><label>Question Text</label><input type="text" id="q-text" placeholder="Enter question here..."></div>
+                                <div class="form-group"><label>Question Image URL (Optional)</label><input type="text" id="q-img" placeholder="http://..."></div>
+                                <div class="form-group"><label>Answer Explanation / Solution (Optional)</label><textarea id="q-explain" style="height:60px; font-family:sans-serif;" placeholder="Explain why the answer is correct..."></textarea></div>
+
+                                <label style="margin-top:15px;">Options (Click 🔘 to set correct)</label>
+                                <div style="display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:15px;">
+                                    <div class="option-row" style="display:flex; align-items:center; gap:8px;"><input type="radio" name="correct-ans" value="0" style="width:20px; height:20px; accent-color:#10b981;" checked><input type="text" id="o1" placeholder="Option A" style="flex:1"><input type="text" id="o1-img" placeholder="Img A" style="flex:1"></div>
+                                    <div class="option-row" style="display:flex; align-items:center; gap:8px;"><input type="radio" name="correct-ans" value="1" style="width:20px; height:20px; accent-color:#10b981;"><input type="text" id="o2" placeholder="Option B" style="flex:1"><input type="text" id="o2-img" placeholder="Img B" style="flex:1"></div>
+                                    <div class="option-row" style="display:flex; align-items:center; gap:8px;"><input type="radio" name="correct-ans" value="2" style="width:20px; height:20px; accent-color:#10b981;"><input type="text" id="o3" placeholder="Option C" style="flex:1"><input type="text" id="o3-img" placeholder="Img C" style="flex:1"></div>
+                                    <div class="option-row" style="display:flex; align-items:center; gap:8px;"><input type="radio" name="correct-ans" value="3" style="width:20px; height:20px; accent-color:#10b981;"><input type="text" id="o4" placeholder="Option D" style="flex:1"><input type="text" id="o4-img" placeholder="Img D" style="flex:1"></div>
+                                </div>
+                                <div class="action-buttons"><button type="button" class="btn-primary" onclick="saveQuestion()">💾 Save</button><button type="button" class="btn-secondary" onclick="closeQuestionModal()">Cancel</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="admin-categories" class="admin-section" style="display:none;">
+                    <h3>Category Management</h3>
+                    <div class="form-group">
+                        <label>Select Category</label>
+                        <select id="category-tool-select" style="width:100%; padding:10px;"><option value="">-- Select Category --</option></select>
+                    </div>
+                    <div class="form-group" id="poster-input-group" style="display:none;">
+                        <label>Poster Image URL</label>
+                        <input type="text" id="poster-url" placeholder="http://example.com/image.jpg">
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-danger" onclick="deleteCategory()">🗑️ Delete Category</button>
+                        <button class="btn-danger" onclick="deleteAllCategories()" style="background: #b91c1c;">💣 Delete ALL</button>
+                        <button class="btn-secondary" onclick="showPosterInput()">🖼️ Set Poster</button>
+                        <button class="btn-success" id="save-poster-btn" onclick="savePoster()" style="display:none;">💾 Save Poster</button>
+                    </div>
+                </div>
+
+                <div id="admin-ai-generator" class="admin-section" style="display:none;">
+                    <h3>🤖 AI Question Generator</h3>
+                    <div class="ai-instruction"><strong>How to use:</strong> Select Language & Topic → Copy prompt → Paste in ChatGPT → Import JSON</div>
+                    <div class="ai-controls" style="grid-template-columns: 1fr 1fr 1fr;">
+                        <div class="form-group"><label>Category</label><input type="text" id="ai-category" placeholder="Topic" value="Physics"></div>
+                        <div class="form-group"><label>Questions</label><input type="number" id="ai-count" value="5" min="1" max="20"></div>
+                        <div class="form-group"><label>Explanation Language</label><select id="ai-lang" onchange="updatePrompt()"><option value="Hinglish" selected>🇮🇳 Hinglish</option><option value="English">🇬🇧 English</option><option value="Hindi">🇮🇳 Hindi</option></select></div>
+                    </div>
+                    <div class="ai-prompt-box">
+                        <h4>Prompt Template:</h4>
+                        <textarea id="ai-prompt" style="height:150px; font-size:12px; font-family:monospace;"></textarea>
+                        <div style="margin-top:10px; display:flex; gap:10px;"><button class="btn-secondary" onclick="updatePrompt()">🔄 Refresh Prompt</button><button class="btn-success" onclick="copyPrompt()">📋 Copy Prompt</button></div>
+                    </div>
+                </div>
+
+                <div id="admin-import-export" class="admin-section" style="display:none;">
+                    <div class="admin-header-bar"><h3>📊 Import / Export Data</h3><button class="back-btn-admin" onclick="showAdminSection('dashboard')">⬅ Back</button></div>
+                    <div class="form-group"><label>Select Category to Export:</label><select id="import-export-cat" style="width:100%; padding:10px;"><option value="ALL">All Categories</option></select></div>
+                    <div class="admin-section" style="background: var(--bg); border:none; padding: 15px 10px;">
+                        <h4 style="margin-top:0; border-bottom:none;">📥 Import Settings</h4>
+                        <div class="form-group"><label>Rename Category (Optional):</label><input type="text" id="rename-category-input" placeholder="e.g. 'Science 2024'"><small style="color:var(--text-sub)">If you type here, ALL imported questions will be saved under this name.</small></div>
+                        <div class="merge-option" style="background:var(--card-bg); padding:12px; border:1px solid var(--border); border-radius:8px; margin-bottom:15px;">
+                            <div style="margin-bottom:8px; font-weight:bold;">Action Type:</div>
+                            <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;"><input type="radio" name="import_mode" value="merge" checked> <span>✅ <strong>Merge / Append</strong> (Keep old data, add new)</span></label>
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="import_mode" value="replace"> <span>🗑️ <strong>Replace</strong> (Delete OLD data of this category, then add new)</span></label>
+                        </div>
+                        <div class="import-export-controls">
+                            <button class="btn-secondary" onclick="document.getElementById('file-imp').click()">📁 Select JSON File</button>
+                            <button class="btn-secondary" onclick="showPasteArea()">📋 Paste JSON Text</button>
+                            <button class="btn-success" onclick="exportData(document.getElementById('import-export-cat').value)">📤 Export Data</button>
+                        </div>
+                    </div>
+                    <input type="file" id="file-imp" style="display:none" onchange="importData(this)">
+                    <div id="paste-area" style="display:none; margin-top:15px; border-top:1px solid var(--border); padding-top:15px;">
+                        <label style="font-size:13px;">Paste JSON Here:</label>
+                        <textarea id="paste-json" style="height:150px; font-family:monospace; font-size:12px; width:100%; padding:10px;" placeholder='[{"question":"...","options":[...],"correct":0},...]'></textarea>
+                        <div class="action-buttons"><button class="btn-success" onclick="processImport(document.getElementById('paste-json').value)">✅ Load Data</button><button class="btn-secondary" onclick="cancelPaste()">Cancel</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bottom-nav" id="mobile-nav">
+        <button class="nav-item active" onclick="goToHome()"><span class="nav-icon">🏠</span><span>Home</span></button>
+        <button class="nav-item" onclick="startWeakQuiz()"><span class="nav-icon">❤️‍🩹</span><span>Weak</span></button>
+        <button class="nav-item" onclick="showScreen('screen-store'); renderStore();"><span class="nav-icon">🛍️</span><span>Store</span></button>
+        <button class="nav-item" onclick="toggleTheme()"><span class="nav-icon" id="nav-theme-icon">🌙</span><span>Theme</span></button>
+        <button class="nav-item" onclick="setMode('admin')"><span class="nav-icon">⚙️</span><span>Admin</span></button>
+    </div>
+
+<script>
+    // --- 1. STATE MANAGEMENT ---
+    let db = JSON.parse(localStorage.getItem('quizDB')) || [];
+    let weakQuestions = JSON.parse(localStorage.getItem('weakQuestions')) || [];
+    let categoryMeta = JSON.parse(localStorage.getItem('categoryMeta')) || {};
+    let settings = JSON.parse(localStorage.getItem('quizSettings')) || {
+        randomQuestions: false,
+        randomOptions: false,
+        showProgress: true
+    };
+    
+    let activeQuiz = [];
+    let currentIdx = 0;
+    let score = 0;
+    let answered = false;
+    let isReviewing = false;
+    let currentFilter = 'ALL';
+    let randomizeQuestions = false;
+    let randomizeOptions = false;
+    let currentAdminSection = 'dashboard';
+
+    // --- 2. THEME MANAGEMENT ---
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+        setTheme(theme);
+    }
+    function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        updateThemeIcon(theme);
+    }
+    function toggleTheme() {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+    }
+    function updateThemeIcon(theme) {
+        const icon = document.getElementById('theme-icon');
+        icon.textContent = theme === 'light' ? '🌙' : '☀️';
+    }
+
+    // --- 3. NAVIGATION & UI ---
+    function setMode(mode) {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        document.body.className = mode + '-mode';
+        if(mode === 'user') {
+            goToHome();
+            document.getElementById('menu-toggle').style.display = 'none';
+        } else {
+            showScreen('screen-admin');
+            showAdminSection('dashboard');
+            document.getElementById('menu-toggle').style.display = 'block';
+        }
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('admin-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+
+    // --- 4. STORE LOGIC (NEW) ---
+    // Hardcoded sample packs for demonstration
+    const questionStore = [
+        {
+            id: "pack_isro_01",
+            title: "ISRO Technician B (Electronics)",
+            desc: "20 Important questions for Electronics Mechanic based on PYQ (ISRO/DRDO).",
+            questions: [
+                {id: 9001, category: "ISRO Tech-B", question: "Which logic gate is known as the Universal Gate?", options: [{text:"AND"}, {text:"OR"}, {text:"NAND"}, {text:"XOR"}], correct: 2, explanation: "NAND and NOR are universal gates because they can create any other logic gate."},
+                {id: 9002, category: "ISRO Tech-B", question: "Unit of Capacitance is?", options: [{text:"Henry"}, {text:"Farad"}, {text:"Ohm"}, {text:"Watt"}], correct: 1, explanation: "Farad is the SI unit of Capacitance. Henry is for Inductance."},
+                {id: 9003, category: "ISRO Tech-B", question: "In NPN transistor, the direction of current flow is?", options: [{text:"Emitter to Base"}, {text:"Collector to Emitter"}, {text:"Base to Collector"}, {text:"Emitter to Collector"}], correct: 1, explanation: "Conventional current flows from Collector to Emitter in NPN."},
+                {id: 9004, category: "ISRO Tech-B", question: "Full form of CRO?", options: [{text:"Cathode Ray Oscillator"}, {text:"Cathode Ray Oscilloscope"}, {text:"Current Ray Output"}, {text:"Central Resistance Output"}], correct: 1, explanation: "CRO stands for Cathode Ray Oscilloscope."}
+            ]
+        },
+        {
+            id: "pack_comp_01",
+            title: "Computer GK (Basic)",
+            desc: "Essential computer knowledge for technical exams.",
+            questions: [
+                {id: 8001, category: "Computer GK", question: "Brain of the computer is?", options: [{text:"Mouse"}, {text:"Keyboard"}, {text:"CPU"}, {text:"Monitor"}], correct: 2, explanation: "CPU (Central Processing Unit) is the brain."},
+                {id: 8002, category: "Computer GK", question: "RAM stands for?", options: [{text:"Read Access Memory"}, {text:"Random Access Memory"}, {text:"Read All Memory"}, {text:"Random All Memory"}], correct: 1, explanation: "Random Access Memory."}
+            ]
+        }
+    ];
+
+    function renderStore() {
+        const grid = document.getElementById('store-list');
+        const search = document.getElementById('store-search').value.toLowerCase();
+        grid.innerHTML = '';
+
+        questionStore.forEach(pack => {
+            if(pack.title.toLowerCase().includes(search) || pack.desc.toLowerCase().includes(search)) {
+                // Check if already installed (Check specific category existence)
+                const isInstalled = db.some(q => q.category === pack.questions[0].category);
+                
+                const btnHtml = isInstalled 
+                    ? `<button class="btn-install installed">✅ Installed</button>` 
+                    : `<button class="btn-install" onclick="installPack('${pack.id}')">⬇ Install Pack</button>`;
+
+                grid.innerHTML += `
+                <div class="store-card">
+                    <div>
+                        <span class="store-badge">FREE</span>
+                        <div class="store-title">${pack.title}</div>
+                        <div class="store-desc">${pack.desc}</div>
+                        <div style="font-size:11px; color:var(--text-light)">${pack.questions.length} Questions</div>
+                    </div>
+                    <div style="margin-top:10px;">${btnHtml}</div>
+                </div>`;
+            }
+        });
+    }
+
+    function installPack(packId) {
+        const pack = questionStore.find(p => p.id === packId);
+        if(!pack) return;
+
+        if(!confirm(`Download & Install "${pack.title}"?`)) return;
+
+        let addedCount = 0;
+        pack.questions.forEach(newQ => {
+            const exists = db.some(existingQ => existingQ.question === newQ.question);
+            if(!exists) {
+                newQ.id = Date.now() + Math.random(); 
+                db.push(newQ);
+                addedCount++;
+            }
+        });
+
+        localStorage.setItem('quizDB', JSON.stringify(db));
+        alert(`🎉 Success! ${addedCount} new questions added.`);
+        
+        renderStore();
+        updateDashboardStats();
+    }
+
+    // --- 5. ADMIN LOGIC ---
+    function showAdminSection(section) {
+        document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+        event.target.classList.add('active');
+        document.querySelectorAll('.admin-main > .admin-section').forEach(s => s.style.display = 'none');
+        
+        const sectionEl = document.getElementById('admin-' + section);
+        if(sectionEl) {
+            sectionEl.style.display = 'block';
+            currentAdminSection = section;
+            if(section === 'dashboard') updateDashboardStats();
+            else if(section === 'questions') renderAdminQuestions();
+            else if(section === 'categories') populateCategoryTools();
+            else if(section === 'import-export') populateImportExportCat();
+        }
+        if(window.innerWidth <= 768) toggleSidebar();
+    }
+
+    function updateDashboardStats() {
+        const cats = [...new Set(db.map(q => q.category))];
+        document.getElementById('total-questions').textContent = db.length;
+        document.getElementById('total-categories').textContent = cats.length;
+        document.getElementById('total-quizzes').textContent = localStorage.getItem('quizCount') || '0';
+    }
+
+    // --- QUESTION MANAGEMENT ---
+    function openQuestionModal(isEdit = false) {
+        document.getElementById('question-modal').style.display = 'block';
+        document.getElementById('modal-title').innerText = isEdit ? 'Edit Question' : 'Add New Question';
+        if(!isEdit) resetForm();
+    }
+    function closeQuestionModal() { document.getElementById('question-modal').style.display = 'none'; }
+    window.onclick = function(event) { if (event.target == document.getElementById('question-modal')) closeQuestionModal(); }
+
+    function renderAdminQuestions(filterCat = null) {
+        if(filterCat !== null) currentFilter = filterCat;
+        const list = document.getElementById('admin-list');
+        list.innerHTML = '';
+        const cats = [...new Set(db.map(q => q.category))].sort();
+        const select = document.getElementById('cat-select');
+        select.innerHTML = '<option value="">-- New Category --</option>';
+        cats.forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
+
+        const filtersDiv = document.getElementById('admin-filters');
+        filtersDiv.innerHTML = `<div class="filter-chip ${currentFilter==='ALL'?'active':''}" onclick="renderAdminQuestions('ALL')">All</div>`;
+        cats.forEach(c => filtersDiv.innerHTML += `<div class="filter-chip ${currentFilter===c?'active':''}" onclick="renderAdminQuestions('${c}')">${c}</div>`);
+
+        let displayList = currentFilter === 'ALL' ? db : db.filter(q => q.category === currentFilter);
+        const searchTerm = document.getElementById('search-questions')?.value.toLowerCase() || '';
+        if(searchTerm) displayList = displayList.filter(q => q.question.toLowerCase().includes(searchTerm) || q.category.toLowerCase().includes(searchTerm));
+        
+        if(displayList.length === 0) { list.innerHTML = '<p style="text-align:center; color:var(--text-sub)">No questions found.</p>'; return; }
+
+        displayList.forEach(q => {
+            const div = document.createElement('div');
+            div.className = 'q-list-item';
+            div.innerHTML = `<div><span style="font-size:10px; background:var(--primary); color:white; padding:2px 6px; border-radius:4px">${q.category}</span><div style="font-weight:600; font-size:14px; margin-top:4px">${q.question}</div></div><div style="min-width:110px; text-align:right"><button class="btn-sm btn-edit" onclick="editQ(${q.id})">Edit</button><button class="btn-sm btn-del" onclick="delQ(${q.id})">Del</button></div>`;
+            list.appendChild(div);
+        });
+    }
+
+    function syncCatInput() { const val = document.getElementById('cat-select').value; if(val) document.getElementById('cat-input').value = val; }
+
+    function saveQuestion() {
+        const idField = document.getElementById('edit-id');
+        const id = idField.value;
+        const cat = document.getElementById('cat-input').value.trim();
+        const qTxt = document.getElementById('q-text').value.trim();
+        const qImg = document.getElementById('q-img').value.trim();
+        const qExplain = document.getElementById('q-explain').value.trim();
+        const correct = parseInt(document.querySelector('input[name="correct-ans"]:checked').value);
+        const opts = [];
+        for(let i=1; i<=4; i++) opts.push({ text: document.getElementById('o'+i).value.trim(), img: document.getElementById('o'+i+'-img').value.trim() });
+
+        if(!cat || !qTxt || opts.some(o => !o.text)) { alert("Please fill Category, Question, and all Options."); return; }
+
+        const newQ = { id: id ? parseInt(id) : Date.now(), category: cat, question: qTxt, image: qImg, explanation: qExplain, options: opts, correct: correct };
+        if(id) { const idx = db.findIndex(x => x.id == id); if(idx !== -1) db[idx] = newQ; } else db.push(newQ);
+
+        localStorage.setItem('quizDB', JSON.stringify(db));
+        renderAdminQuestions();
+        populateCategoryTools();
+        populateImportExportCat();
+        closeQuestionModal();
+        alert(id ? "✅ Updated!" : "✅ Added!");
+    }
+
+    function editQ(id) {
+        const q = db.find(x => x.id === id);
+        if(!q) return;
+        openQuestionModal(true);
+        document.getElementById('edit-id').value = q.id;
+        document.getElementById('cat-input').value = q.category;
+        document.getElementById('q-text').value = q.question;
+        document.getElementById('q-img').value = q.image || '';
+        document.getElementById('q-explain').value = q.explanation || '';
+        const radios = document.querySelectorAll('input[name="correct-ans"]');
+        if(radios[q.correct]) radios[q.correct].checked = true;
+        q.options.forEach((o, i) => { document.getElementById('o'+(i+1)).value = o.text; document.getElementById('o'+(i+1)+'-img').value = o.img || ''; });
+        document.getElementById('cat-select').value = q.category;
+    }
+
+    function delQ(id) {
+        if(!confirm("🗑️ Delete question?")) return;
+        db = db.filter(x => x.id !== id);
+        weakQuestions = weakQuestions.filter(wid => wid !== id);
+        localStorage.setItem('weakQuestions', JSON.stringify(weakQuestions));
+        localStorage.setItem('quizDB', JSON.stringify(db));
+        renderAdminQuestions();
+        populateCategoryTools();
+        populateImportExportCat();
+    }
+
+    function resetForm() {
+        document.getElementById('edit-id').value = '';
+        document.querySelectorAll('#question-modal input[type="text"], #question-modal textarea').forEach(i => i.value = '');
+        document.getElementById('cat-select').value = '';
+        document.querySelectorAll('input[name="correct-ans"]')[0].checked = true;
+    }
+
+    // --- IMPORT/EXPORT/AI ---
+    function updatePrompt() {
+        const category = document.getElementById('ai-category').value || 'GK';
+        const count = document.getElementById('ai-count').value || '5';
+        const lang = document.getElementById('ai-lang').value;
+        const prompt = `Generate ${count} multiple choice questions for "${category}".\n1. Question & Options in English.\n2. Explanation in ${lang}.\n3. JSON Format ONLY:\n[{"id":1,"category":"${category}","question":"?","image":"","explanation":"...","options":[{"text":"A","img":""},...],"correct":0}]`;
+        document.getElementById('ai-prompt').value = prompt;
+    }
+    function copyPrompt() { document.getElementById('ai-prompt').select(); document.execCommand('copy'); alert('Prompt copied!'); }
+    function populateCategoryTools() {
+        const select = document.getElementById('category-tool-select');
+        const cats = [...new Set(db.map(q => q.category))].sort();
+        select.innerHTML = '<option value="">-- Select Category --</option>';
+        cats.forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
+    }
+    function deleteCategory() {
+        const catName = document.getElementById('category-tool-select').value;
+        if(!catName || !confirm(`Delete "${catName}"?`)) return;
+        db = db.filter(q => q.category !== catName);
+        localStorage.setItem('quizDB', JSON.stringify(db));
+        renderAdminQuestions();
+        populateCategoryTools();
+        alert("Category Deleted!");
+    }
+    function deleteAllCategories() {
+        if(!confirm('⚠️ Delete ALL questions?')) return;
+        db = []; weakQuestions = [];
+        localStorage.setItem('quizDB', JSON.stringify(db));
+        localStorage.setItem('weakQuestions', JSON.stringify(weakQuestions));
+        renderAdminQuestions();
+        alert("All Data Deleted!");
+    }
+    function populateImportExportCat() {
+        const select = document.getElementById('import-export-cat');
+        const cats = [...new Set(db.map(q => q.category))].sort();
+        select.innerHTML = '<option value="ALL">All Categories</option>';
+        cats.forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
+    }
+    function exportData(cat) {
+        const data = (cat === 'ALL') ? db : db.filter(q => q.category === cat);
+        if(!data.length) { alert("No data!"); return; }
+        const a = document.createElement('a');
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+        a.download = "quiz_data.json";
+        a.click();
+    }
+    function importData(input) {
+        const reader = new FileReader();
+        reader.onload = (e) => { processImport(e.target.result); input.value = ''; };
+        reader.readAsText(input.files[0]);
+    }
+    function showPasteArea() { document.getElementById('paste-area').style.display = 'block'; }
+    function cancelPaste() { document.getElementById('paste-area').style.display = 'none'; document.getElementById('paste-json').value=''; }
+    function processImport(jsonStr) {
+        try {
+            const data = JSON.parse(jsonStr);
+            if(!Array.isArray(data)) throw new Error("Invalid Array");
+            const mode = document.querySelector('input[name="import_mode"]:checked').value;
+            const rename = document.getElementById('rename-category-input').value.trim();
+            const catsInImport = rename ? [rename] : [...new Set(data.map(q => q.category))];
+            if(mode === 'replace') {
+                if(rename) db = db.filter(q => q.category !== rename);
+                else db = db.filter(q => !catsInImport.includes(q.category));
+            }
+            const ts = Date.now();
+            data.forEach((item, i) => {
+                db.push({
+                    id: ts + i,
+                    category: rename || item.category || "Uncategorized",
+                    question: item.question,
+                    image: item.image || "",
+                    explanation: item.explanation || "",
+                    options: item.options,
+                    correct: item.correct
+                });
+            });
+            localStorage.setItem('quizDB', JSON.stringify(db));
+            renderAdminQuestions();
+            populateCategoryTools();
+            populateImportExportCat();
+            cancelPaste();
+            alert(`✅ Imported ${data.length} questions.`);
+        } catch(e) { alert("Error: " + e.message); }
+    }
+    function showPosterInput() { document.getElementById('poster-input-group').style.display = 'block'; document.getElementById('save-poster-btn').style.display = 'block'; }
+    function savePoster() {
+        const cat = document.getElementById('category-tool-select').value;
+        if(!cat) return;
+        categoryMeta[cat] = { poster: document.getElementById('poster-url').value.trim() };
+        localStorage.setItem('categoryMeta', JSON.stringify(categoryMeta));
+        alert("Poster Saved!");
+    }
+
+    // --- ANIMATIONS ---
+    function triggerConfetti() {
+        const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
+        for (let i = 0; i < 40; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.left = Math.random()*100+'vw';
+            c.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+            c.style.animationDuration = (Math.random()*2+2)+'s';
+            document.body.appendChild(c);
+            setTimeout(()=>c.remove(), 4000);
+        }
+    }
+
+    // --- USER QUIZ LOGIC ---
+    function toggleRandomizeQuestions() { 
+        randomizeQuestions = !randomizeQuestions; 
+        updateToggleBtnUI('rand-q-btn', randomizeQuestions);
+    }
+    function toggleRandomizeOptions() { 
+        randomizeOptions = !randomizeOptions; 
+        updateToggleBtnUI('rand-o-btn', randomizeOptions);
+    }
+    
+    function updateToggleBtnUI(btnId, state) {
+        const btn = document.getElementById(btnId);
+        if(state) {
+            btn.classList.add('active');
+            btn.innerHTML = btnId.includes('q') ? '🎲 Random Qs: ON' : '🔀 Random Opts: ON';
+        } else {
+            btn.classList.remove('active');
+            btn.innerHTML = btnId.includes('q') ? '🎲 Random Qs: OFF' : '🔀 Random Opts: OFF';
+        }
+    }
+
+    function goToHome() {
+        showScreen('screen-home');
+        const grid = document.getElementById('category-list');
+        grid.innerHTML = '';
+        const cats = {};
+        db.forEach(q => { cats[q.category] = (cats[q.category] || 0) + 1; });
+        const searchTerm = document.getElementById('category-search').value.toLowerCase();
+
+        if(!searchTerm || 'mixed all'.includes(searchTerm)) {
+            grid.innerHTML += `<div class="cat-card" onclick="startQuiz('ALL')"><span class="cat-icon">🚀</span><span class="cat-title">Mixed / All</span><span class="cat-count">${db.length} Questions</span></div>`;
+        }
+
+        const validWeakCount = db.filter(q => weakQuestions.includes(q.id)).length;
+        if (validWeakCount > 0 && (!searchTerm || 'weak revision'.includes(searchTerm))) {
+            grid.innerHTML += `
+            <div class="cat-card" style="border-color:var(--danger); background:#fef2f2;" onclick="startWeakQuiz()">
+               <span class="cat-icon">❤️‍🩹</span>
+               <span class="cat-title" style="color:var(--danger)">Weak / Revision</span>
+               <span class="cat-count">${validWeakCount} Questions to fix</span>
+            </div>`;
+        }
+
+        Object.keys(cats).sort().forEach(c => {
+            if(searchTerm && !c.toLowerCase().includes(searchTerm)) return;
+            const meta = categoryMeta[c] || {};
+            const posterHtml = meta.poster ? `<img src="${meta.poster}" class="cat-thumbnail">` : '';
+            const iconHtml = meta.poster ? '' : `<span class="cat-icon">⚡</span>`;
+            grid.innerHTML += `<div class="cat-card" onclick="startQuiz('${c}')">${posterHtml}${iconHtml}<span class="cat-title">${c}</span><span class="cat-count">${cats[c]} Questions</span></div>`;
+        });
+    }
+
+    function startQuiz(cat) {
+        if(db.length === 0) { alert("No questions!"); return; }
+        activeQuiz = cat === 'ALL' ? JSON.parse(JSON.stringify(db)) : JSON.parse(JSON.stringify(db.filter(q => q.category === cat)));
+        if(randomizeQuestions) activeQuiz.sort(() => Math.random() - 0.5);
+        isReviewing = false; currentIdx = 0; score = 0;
+        showScreen('screen-quiz');
+        loadQuestion();
+    }
+
+    function startWeakQuiz() {
+        activeQuiz = db.filter(q => weakQuestions.includes(q.id));
+        if(activeQuiz.length === 0) { 
+            alert("🎉 Great job! You have cleared all your weak questions."); 
+            weakQuestions = [];
+            localStorage.setItem('weakQuestions', JSON.stringify(weakQuestions));
+            goToHome(); return; 
+        }
+        activeQuiz.sort(() => Math.random() - 0.5); 
+        isReviewing = false; currentIdx = 0; score = 0;
+        showScreen('screen-quiz');
+        loadQuestion();
+    }
+
+    function reviewQuiz() {
+        isReviewing = true; currentIdx = 0;
+        showScreen('screen-quiz');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('q-number').innerText = `Q. ${currentIdx + 1} / ${activeQuiz.length}`;
+        document.getElementById('prev-btn').style.display = (currentIdx > 0) ? 'block' : 'none';
+        const pct = ((currentIdx + 1) / activeQuiz.length) * 100;
+        document.getElementById('p-fill').style.width = pct + '%';
+        
+        if(currentIdx >= activeQuiz.length) { finishQuiz(); return; }
+
+        const q = activeQuiz[currentIdx];
+        const content = document.getElementById('quiz-content');
+
+        if (!q.shuffledOptions && randomizeOptions) {
+            const indices = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
+            q.shuffledOptions = indices.map(i => q.options[i]);
+            q.shuffledCorrect = indices.indexOf(q.correct);
+        }
+        
+        const options = q.shuffledOptions || q.options;
+        const correctIndex = (q.shuffledCorrect !== undefined) ? q.shuffledCorrect : q.correct;
+        
+        let optsHtml = '';
+        options.forEach((opt, i) => {
+            let optImg = opt.img ? `<img src="${opt.img}" class="opt-img-thumb">` : '';
+            let extraClass = '';
+            let isDisabled = false;
+            if (isReviewing || q.userAnswer !== undefined) {
+                isDisabled = true;
+                extraClass += ' disabled';
+                if (i === correctIndex) extraClass += ' correct';
+                else if (i === q.userAnswer) extraClass += ' wrong';
+            }
+            const clickAttr = isDisabled ? '' : `onclick="handleAnswer(this, ${i}, ${correctIndex})"`;
+            optsHtml += `<div class="option ${extraClass}" ${clickAttr}>${optImg} ${opt.text}</div>`;
+        });
+
+        const explainContent = q.explanation ? q.explanation : "No explanation provided.";
+        const showExplainStyle = (isReviewing || (q.userAnswer !== undefined && q.explanation)) ? 'block' : 'none';
+
+        content.innerHTML = `
+            <div style="text-align:center;"><span class="q-badge">${q.category}</span></div>
+            <div class="question-text">${q.question}</div>
+            ${q.image ? `<img src="${q.image}" class="q-img">` : ''}
+            <div class="options-list">${optsHtml}</div>
+            <div id="explanation-box-${currentIdx}" class="explanation-box" style="display:${showExplainStyle}">
+                <div class="explanation-title">💡 Explanation:</div>${explainContent}
+            </div>`;
+        
+        if (isReviewing || q.userAnswer !== undefined) { answered = true; document.getElementById('next-btn').style.display = 'block'; }
+    }
+
+    function handleAnswer(el, idx, correctIdx) {
+        if(answered) return;
+        answered = true;
+        const currentQ = activeQuiz[currentIdx];
+        currentQ.userAnswer = idx;
+        const opts = document.querySelectorAll('.option');
+
+        if(idx === correctIdx) {
+            el.classList.add('correct');
+            score++;
+            triggerConfetti();
+            if(weakQuestions.includes(currentQ.id)) {
+                weakQuestions = weakQuestions.filter(id => id !== currentQ.id);
+                localStorage.setItem('weakQuestions', JSON.stringify(weakQuestions));
+            }
+        } else {
+            el.classList.add('wrong');
+            el.classList.add('shake');
+            setTimeout(() => { el.classList.remove('shake'); }, 500);
+            opts[correctIdx].classList.add('correct');
+            if(!weakQuestions.includes(currentQ.id)) {
+                weakQuestions.push(currentQ.id);
+                localStorage.setItem('weakQuestions', JSON.stringify(weakQuestions));
+            }
+        }
+        
+        const box = document.getElementById(`explanation-box-${currentIdx}`);
+        if(box && currentQ.explanation) box.style.display = 'block';
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function nextQuestion() { currentIdx++; if(currentIdx < activeQuiz.length) loadQuestion(); else finishQuiz(); }
+    function prevQuestion() { if(currentIdx > 0) { currentIdx--; loadQuestion(); } }
+    function finishQuiz() {
+        showScreen('screen-result');
+        const percentage = Math.round((score / activeQuiz.length) * 100);
+        document.getElementById('final-score').innerText = percentage + '%';
+        document.getElementById('result-detail').innerText = `You scored ${score} out of ${activeQuiz.length}`;
+        if(!isReviewing) { localStorage.setItem('quizCount', (parseInt(localStorage.getItem('quizCount')||'0') + 1)); }
+    }
+
+    // --- INIT ---
+    initTheme();
+    updatePrompt();
+    goToHome();
+</script>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker registered!', reg))
+                .catch(err => console.log('SW registration failed:', err));
+        });
+    }
+</script>
+
+</body>
+</html>
